@@ -5,8 +5,18 @@ const bodyParser = require('body-parser');
 // Load in the mongoose models
 const { List, Task } = require('./db/models');
 
-// Load middleware
+// LOAD MIDDLEWARE
 app.use(bodyParser.json());
+
+
+// CORS HEADERS MIDDLEWARE
+// https://enable-cors.org/server_expressjs.html
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*"); // ikinci parametre * şuan, yoksa cors hatası gelir buraya domain yazılabilir
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
 
 /* ROUTE HANDLERS */
 
