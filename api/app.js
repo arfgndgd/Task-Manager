@@ -72,7 +72,9 @@ app.get('/lists/:listId/tasks', (req, res) => {
     })
 })
 
-// Specific task by taskId
+/*
+ * Get specific task by listId taskId 
+ */
 app.get('/lists/:listId/tasks/:taskId', (req, res) => {
     Task.findOne({
         _id: req.params.taskId,
