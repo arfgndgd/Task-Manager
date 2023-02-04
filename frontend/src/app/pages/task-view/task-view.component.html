@@ -7,18 +7,15 @@
             </h1>
 
             <div class="list-menu">
-                <a class="list-menu-item is-active">
-                    <p>List #1</p>
+                <!-- liste elemanlarını id ile birlikte urle yazar /lists/<id> -->
+                <a class="list-menu-item" *ngFor="let list of lists" [routerLink]="['/lists', list._id]" routerLinkActive="is-active" > 
+                    <p>{{ list.title }}</p>
                 </a>
-                <a class="list-menu-item">
-                    <p>List #1</p>
-                </a>
-                <a class="list-menu-item">
-                    <p>List #1</p>
-                </a>
+
             </div>
 
-            <button class="button is-primary has-text-white" routerLink="/new-list" routerLinkActive="router-link-active" >+ New List</button>
+            <!-- Yeni liste butonu ile ekleme sayfasına gider -->
+            <button class="button is-primary has-text-white" routerLink="/new-list">+ New List</button>
 
         </div>
 
@@ -28,15 +25,14 @@
             </h1>
 
             <!-- Task Elements -->
-            <div class="task">
-                <p>This is something I have to do</p>
+            <div class="task" *ngFor="let task of tasks">
+                <p>{{ task.title }}</p>
             </div>
-            <div class="task">
-                <p>This is something I have to do</p>
-            </div>
-            <div class="task complete">
-                <p>This is something I have to do</p>
-            </div>
+
+            <button class="circle-add-button button is-primary">
+                <img src="../../../assets/add.png">
+            </button>
+            
         </div>
     </div>
 </div>

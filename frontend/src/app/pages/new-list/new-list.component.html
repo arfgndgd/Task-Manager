@@ -4,11 +4,12 @@
             Create a new list
         </h1>
 
+        <!-- #listTitleInput.value metodta kullanarak httpClient ile direkt ekleme yapar -->
         <input #listTitleInput class="input has-background-light is-medium" type="text" placeholder="Enter List Name">
         <br><br>
         <div class="buttons is-right">
-            <div class="button is-medium" routerLink="/">Cancel</div>
-            <div class="button is-primary has-text-white is-medium" (click)="createList(listTitleInput.value)">Create</div>
+            <div class="button is-medium" routerLink="/">Cancel</div> <!-- anasayfaya route yapar "/" -->
+            <div class="button is-primary has-text-white is-medium" (click)="createList(listTitleInput.value)">Create</div> <!-- listeye yeni eleman ekler -->
         </div>
     </div>
 </div>
