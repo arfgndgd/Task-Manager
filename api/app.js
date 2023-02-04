@@ -26,7 +26,7 @@ app.get('/lists', (req, res) => {
  */
 app.post('/lists', (req, res) => {
     let title = req.body.title;
-    
+
     let newList = new List({
         title
     });
@@ -41,6 +41,11 @@ app.post('/lists', (req, res) => {
  * Purpose: Update a specified list
  */
 app.patch('/lists/:id', (req, res) => {
+    List.findOneAndUpdate({ _id: req.params.id }, {
+        $set: req.body
+    }).then(() => {
+        res.sendStatus(200);
+    })
 })
 
 /*
@@ -48,7 +53,77 @@ app.patch('/lists/:id', (req, res) => {
  * Purpose: Delete a list
  */
 app.delete('/lists/:id', (req, res) => {
+    List.findOneAndRemove({
+        _id: req.params.id
+    }).then((removeListDoc) => {
+        res.sendStatus(removeListDoc);
+    })
 })
+
+/*
+ * GET /lists/:listId/tasks
+ * Purpose: Get all tasks in a specific list
+ */
+app.get('/lists/:listId/tasks', (req, res) => {
+    Task.find({
+        _listId: req.params.listId
+    }).then((tasks) => {
+        res.send(tasks);
+    })
+})
+
+// Specific task by taskId
+app.get('/lists/:listId/tasks/:taskId', (req, res) => {
+    Task.findOne({
+        _id: req.params.taskId,
+        _listId: req.params.listId
+    }).then((task) => {
+        res.send(task);
+    })
+})
+
+/*
+ * POST /lists/:listId/tasks
+ * Purpose: Create a new task in a specific list
+ */
+app.post('/lists/:listId/tasks', (req, res) => {
+    let newTask = new Task({
+        title: req.body.title,
+        _listId: req.params.listId
+    });
+    newTask.save().then((newTaskDoc) => {
+        res.send(newTaskDoc);
+    })
+})
+
+/**
+ * PATCH /lists/:listId/tasks/:taskId
+ * Purpose: Update an existing task
+ */
+app.patch('/lists/:listId/tasks/:taskId', (req, res) => {
+    Task.findOneAndUpdate({
+        _id: req.params.taskId,
+        _listId: req.params.listId
+    }, {
+            $set: req.body
+        }
+    ).then(() => {
+        res.sendStatus(200);
+    })
+})
+
+/*
+ * DELETE /lists/:listId/tasks/:taskId
+ * Purpose: Delete a task
+ */
+app.delete('/lists/:listId/tasks/:taskId', (req, res) => {
+    Task.findOneAndRemove({
+        _id: req.params.taskId,
+        _listId: req.params.listId
+    }).then((removedTaskDoc) => {
+        res.send(removedTaskDoc);
+    });
+});
 
 app.listen(3000, () => {
     console.log("Server listening o port 3000");
