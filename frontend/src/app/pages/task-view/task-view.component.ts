@@ -32,4 +32,6 @@ export class TaskViewComponent implements OnInit {
       console.log(this.lists)
     })
   }
+
+  //TODO: task routerlink hatalı
 }

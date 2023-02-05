@@ -1,0 +1,15 @@
+<div class="centered-content">
+    <div class="modal-box">
+        <h1 class="title">
+            Create a new task
+        </h1>
+
+        <!-- #taskTitleInput.value metodta kullanarak httpClient ile direkt ekleme yapar -->
+        <input #taskTitleInput class="input has-background-light is-medium" type="text" placeholder="Enter Task Name">
+        <br><br>
+        <div class="buttons is-right">
+            <div class="button is-medium" routerLink="/">Cancel</div> <!-- anasayfaya route yapar "/" -->
+            <div class="button is-primary has-text-white is-medium" (click)="createTask(taskTitleInput.value)">Create</div> <!-- taska yeni eleman ekler -->
+        </div>
+    </div>
+</div>
