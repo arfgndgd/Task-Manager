@@ -37,13 +37,6 @@
     border-bottom-right-radius: 8px;
 }
 
-.title {
-    font-family: 'Lato';
-    font-size: 28px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
 .list-menu {
 
     display: flex;
@@ -92,7 +85,7 @@
         }
     }
 
-    &.complete { //üzeri çizilmiş task 
+    &.completed { //üzeri çizilmiş task 
         text-decoration: line-through;
         opacity: 0.8;
     }
