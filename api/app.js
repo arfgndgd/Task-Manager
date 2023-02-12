@@ -138,7 +138,17 @@ app.delete('/lists/:listId/tasks/:taskId', (req, res) => {
     });
 });
 
+/* USER ROUTES*/
 
+/*
+ * POST /users
+ * Purpose: Sign up
+ */
+app.post('/users', (req, res) => {
+    // User sign up
+    let body = req.body;
+    let newUser = new User
+})
 
 app.listen(3000, () => {
     console.log("Server listening o port 3000");
