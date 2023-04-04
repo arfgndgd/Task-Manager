@@ -12,7 +12,7 @@ import { TaskService } from 'src/app/task.service';
 export class TaskViewComponent implements OnInit {
 
   lists: List[];
-  tasks: Task[];
+  tasks?: Task[]; //? nedeni aşağıda sıkıntı çıkarması
 
   constructor(private taskService: TaskService, private route: ActivatedRoute) { }
 
@@ -21,10 +21,15 @@ export class TaskViewComponent implements OnInit {
     // active route belirtir
     this.route.params.subscribe(
       (params: Params) => {
-        console.log(params)
-        this.taskService.getTasks(params['listId']).subscribe((tasks: any) => {
-          this.tasks = tasks;
-        })
+        if (params['listId']) {
+          console.log(params)
+          this.taskService.getTasks(params['listId']).subscribe((tasks: any) => {
+            this.tasks = tasks;
+          })
+        } else {
+          this.tasks = undefined;
+        }
+
       }
     )
 

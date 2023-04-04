@@ -1,7 +1,7 @@
 // This file will handle connection logic to MongoDB
 
 const mongoose = require('mongoose');
-
+mongoose.set("strictQuery", false);
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://localhost:27017/TaskManager', { useNewUrlParser: true}).then(() => {
     console.log("Connected to MongoDB");

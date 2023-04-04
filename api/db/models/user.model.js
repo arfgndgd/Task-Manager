@@ -28,7 +28,7 @@ const UserSchema = new mongoose.Schema({
             required: true
         },
         expiresAt: {
-            type: String,
+            type: Number,
             required: true
         }
     }]
@@ -48,7 +48,7 @@ UserSchema.methods.generateAccessAuthToken = function() {
     const user = this;
     return new Promise((resolve, reject) => {
         // Create the JWT and return that
-        twt.sign({ _id: user._id.toHexString() }, jwtSecret, {expiresIn: "15m"}, (err, token) => {
+        jwt.sign({ _id: user._id.toHexString() }, jwtSecret, {expiresIn: "15m"}, (err, token) => {
             if (!err) {
                 resolve(token);
             } else {
@@ -94,7 +94,7 @@ UserSchema.statics.findByIdAndToken = function(_id, token) {
     const user = this;
     return user.findOne({
         _id,
-        'session.token': token
+        'sessions.token': token
     });
 }
 
