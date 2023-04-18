@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 // Load in the mongoose models
 const { List, Task, User } = require('./db/models');
 
+const jwt = require('jsonwebtoken');
 
 /* MIDDLEWARE */
 
@@ -18,12 +19,29 @@ app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*"); // ikinci parametre * şuan, yoksa cors hatası gelir buraya domain yazılabilir
     res.header("Access-Control-Allow-Methods", "GET, POST, HEAD, OPTIONS, PUT, PATCH, DELETE");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, x-access-token, x-refresh-token, _id");
-    res.header(	
-        'Access-Control-Expose-Headers',	
-        'x-access-token, x-refresh-token'	
+    res.header(
+        'Access-Control-Expose-Headers',
+        'x-access-token, x-refresh-token'
     );
     next();
 });
+
+// isteğin geçerli bir JWT access tokenı olup olmadığını kontrol edin
+let authenticate = (req, res, next) => {
+    let token = req.header('x-access-token');
+
+    // verify the JWT
+    jwt.verify(token, User.getJWTSecret(), (err, decoded) => {
+        if (err) {
+            // error => jwt is invalid - * DO NOT AUTHENTICATE *
+            res.status(401).send(err);
+        } else {
+            // jwt is valid
+            req.user_id = decoded._id;
+            next();
+        }
+    });
+}
 
 // Refresh Token Middleware'i Doğrulayın (bu, oturumu doğrulayacaktır)
 let verifySession = (req, res, next) => {
@@ -80,9 +98,14 @@ let verifySession = (req, res, next) => {
  * GET /lists
  * Purpose: Get all lists
  */
-app.get('/lists', (req, res) => {
-    List.find({}).then((lists) => {
+app.get('/lists', authenticate, (req, res) => {
+    // Kimliği doğrulanmış kullanıcıya ait tüm listelerin bir dizisini döndürmek istiyoruz
+    List.find({
+        // _userId: req.user_id
+    }).then((lists) => {
         res.send(lists);
+    }).catch((e) => {
+        res.send(e);
     });
 })
 
@@ -123,6 +146,9 @@ app.delete('/lists/:id', (req, res) => {
         _id: req.params.id
     }).then((removeListDoc) => {
         res.sendStatus(removeListDoc);
+
+        // silinenler listesindeki tüm taskları sil
+        deleteTasksFromList(removeListDoc._id);
     })
 })
 
@@ -269,6 +295,16 @@ app.get('/users/me/access-token', verifySession, (req, res) => {
         res.status(400).send(e);
     });
 });
+
+
+/* HELPER METHODS */
+let deleteTasksFromList = (_listId) => {
+    Task.deleteMany({
+        _listId
+    }).then(() => {
+        console.log("Task from " + _listId + " were deleted!");
+    })
+}
 
 app.listen(3000, () => {
     console.log("Server listening on port 3000");
