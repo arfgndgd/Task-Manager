@@ -191,8 +191,8 @@ app.post('/lists/:listId/tasks', authenticate, (req, res) => {
         _userId: req.user_id
     }).then((list) => {
         if (list) {
-            //list object with the specified conditions was found
-            // therefore the currently authenticated user can create new tasks
+            // belirtilen koşullara sahip list objecti bulundu
+            // bu nedenle şu anda auth kullanıcı yeni tasks oluşturabilir
             return true;
         }
 
@@ -225,8 +225,8 @@ app.patch('/lists/:listId/tasks/:taskId', authenticate, (req, res) => {
         _userId: req.user_id
     }).then((list) => {
         if (list) {
-            //list object with the specified conditions was found
-            // therefore the currently authenticated user can make updates to tasks within this list
+            // belirtilen koşullara sahip list objecti bulundu
+            // bu nedenle şu anda authenticated kullanıcı bu listedeki taskslarda güncellemeler yapabilir
             return true;
         }
 
@@ -234,7 +234,7 @@ app.patch('/lists/:listId/tasks/:taskId', authenticate, (req, res) => {
         return false;
     }).then((canUpdateTasks) => {
         if (canUpdateTasks) {
-            // the currently authenticated user can update tasks
+            // şu anda authenticated kullanıcı tasks güncelleyebilir
             Task.findOneAndUpdate({
                 _id: req.params.taskId,
                 _listId: req.params.listId
@@ -254,12 +254,31 @@ app.patch('/lists/:listId/tasks/:taskId', authenticate, (req, res) => {
  * DELETE /lists/:listId/tasks/:taskId
  * Purpose: Delete a task
  */
-app.delete('/lists/:listId/tasks/:taskId', (req, res) => {
-    Task.findOneAndRemove({
-        _id: req.params.taskId,
-        _listId: req.params.listId
-    }).then((removedTaskDoc) => {
-        res.send(removedTaskDoc);
+app.delete('/lists/:listId/tasks/:taskId', authenticate, (req, res) => {
+
+    List.findOne({
+        _id: req.params.listId,
+        _userId: req.user_id
+    }).then((list) => {
+        if (list) {
+            // belirtilen koşullara sahip list objecti bulundu
+            // bu nedenle şu anda auth kullanıcı bu listedeki taskslarda güncellemeler yapabilir
+            return true;
+        }
+
+        // else - the list object is undefined
+        return false;
+    }).then((canDeleteTasks) => {
+        if (canDeleteTasks) {
+            Task.findOneAndRemove({
+                _id: req.params.taskId,
+                _listId: req.params.listId
+            }).then((removedTaskDoc) => {
+                res.send(removedTaskDoc);
+            });
+        } else {
+            res.sendStatus(404);
+        }
     });
 });
 
