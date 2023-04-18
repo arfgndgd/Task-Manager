@@ -101,7 +101,7 @@ let verifySession = (req, res, next) => {
 app.get('/lists', authenticate, (req, res) => {
     // Kimliği doğrulanmış kullanıcıya ait tüm listelerin bir dizisini döndürmek istiyoruz
     List.find({
-        // _userId: req.user_id
+        _userId: req.user_id
     }).then((lists) => {
         res.send(lists);
     }).catch((e) => {
@@ -113,11 +113,12 @@ app.get('/lists', authenticate, (req, res) => {
  * POST /lists
  * Purpose: Create a list
  */
-app.post('/lists', (req, res) => {
+app.post('/lists', authenticate, (req, res) => {
     let title = req.body.title;
 
     let newList = new List({
-        title
+        title,
+        _userId: req.user_id
     });
     newList.save().then((listDoc) => {
         //tüm listeyi döndürür (incl. id)
@@ -126,11 +127,11 @@ app.post('/lists', (req, res) => {
 })
 
 /* 
- * PATH /lists/:id
+ * PACTH /lists/:id
  * Purpose: Update a specified list
  */
-app.patch('/lists/:id', (req, res) => {
-    List.findOneAndUpdate({ _id: req.params.id }, {
+app.patch('/lists/:id', authenticate, (req, res) => {
+    List.findOneAndUpdate({ _id: req.params.id, _userId: req.user_id }, {
         $set: req.body
     }).then(() => {
         res.sendStatus(200);
@@ -141,9 +142,10 @@ app.patch('/lists/:id', (req, res) => {
  * DELETE /lists/:id
  * Purpose: Delete a list
  */
-app.delete('/lists/:id', (req, res) => {
+app.delete('/lists/:id', authenticate, (req, res) => {
     List.findOneAndRemove({
-        _id: req.params.id
+        _id: req.params.id,
+        _userId: req.user_id
     }).then((removeListDoc) => {
         res.sendStatus(removeListDoc);
 
@@ -156,7 +158,7 @@ app.delete('/lists/:id', (req, res) => {
  * GET /lists/:listId/tasks
  * Purpose: Get all tasks in a specific list
  */
-app.get('/lists/:listId/tasks', (req, res) => {
+app.get('/lists/:listId/tasks', authenticate, (req, res) => {
     Task.find({
         _listId: req.params.listId
     }).then((tasks) => {
@@ -164,6 +166,8 @@ app.get('/lists/:listId/tasks', (req, res) => {
     })
 })
 
+
+//TODO:sen nessin belli değil 
 /*
  * Get specific task by listId taskId 
  */
@@ -180,13 +184,33 @@ app.get('/lists/:listId/tasks/:taskId', (req, res) => {
  * POST /lists/:listId/tasks
  * Purpose: Create a new task in a specific list
  */
-app.post('/lists/:listId/tasks', (req, res) => {
-    let newTask = new Task({
-        title: req.body.title,
-        _listId: req.params.listId
-    });
-    newTask.save().then((newTaskDoc) => {
-        res.send(newTaskDoc);
+app.post('/lists/:listId/tasks', authenticate, (req, res) => {
+
+    List.findOne({
+        _id: req.params.listId,
+        _userId: req.user_id
+    }).then((list) => {
+        if (list) {
+            //list object with the specified conditions was found
+            // therefore the currently authenticated user can create new tasks
+            return true;
+        }
+
+        // else - the list object is undefined
+        return false;
+
+    }).then((canCreateTask) => {
+        if (canCreateTask) {
+            let newTask = new Task({
+                title: req.body.title,
+                _listId: req.params.listId
+            });
+            newTask.save().then((newTaskDoc) => {
+                res.send(newTaskDoc);
+            })
+        } else {
+            res.sendStatus(404);
+        }
     })
 })
 
@@ -194,15 +218,35 @@ app.post('/lists/:listId/tasks', (req, res) => {
  * PATCH /lists/:listId/tasks/:taskId
  * Purpose: Update an existing task
  */
-app.patch('/lists/:listId/tasks/:taskId', (req, res) => {
-    Task.findOneAndUpdate({
-        _id: req.params.taskId,
-        _listId: req.params.listId
-    }, {
-            $set: req.body
+app.patch('/lists/:listId/tasks/:taskId', authenticate, (req, res) => {
+
+    List.findOne({
+        _id: req.params.listId,
+        _userId: req.user_id
+    }).then((list) => {
+        if (list) {
+            //list object with the specified conditions was found
+            // therefore the currently authenticated user can make updates to tasks within this list
+            return true;
         }
-    ).then(() => {
-        res.send({message: 'Updated successfully'});
+
+        // else - the list object is undefined
+        return false;
+    }).then((canUpdateTasks) => {
+        if (canUpdateTasks) {
+            // the currently authenticated user can update tasks
+            Task.findOneAndUpdate({
+                _id: req.params.taskId,
+                _listId: req.params.listId
+            }, {
+                    $set: req.body
+                }
+            ).then(() => {
+                res.send({message: 'Updated successfully'});
+            })
+        } else {
+            res.sendStatus(404);
+        }
     })
 })
 
