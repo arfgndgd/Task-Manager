@@ -18,9 +18,24 @@ export class AuthService {
       shareReplay(),
       tap((res: HttpResponse<any>) => {
         //auth tokens bu response headerında olacak
-        //TODO: burada sıkıntı var string null ataması yanlış 
-        // this.setSession(res.body._id, res.headers.get('x-access-token'), res.headers.get('x-refresh-token'));
+        //TODO: burada sıkıntı var string null ataması yanlış (  || "" ile çözüldü)
+        this.setSession(res.body._id, res.headers.get('x-access-token') || "", res.headers.get('x-refresh-token') || "");
         console.log('LOGGED IN!');
+        console.log(res);
+      })
+    )
+  }
+
+  signup(email: string, password: string) {
+    return this.webService.signup(email, password).pipe(
+
+      //shareReplay => multicasting; sonuçlardan alınan bilgileri abonelerle aynı anda paylaşmaya yarar
+      shareReplay(),
+      tap((res: HttpResponse<any>) => {
+        //auth tokens bu response headerında olacak
+        //TODO: burada sıkıntı var string null ataması yanlış (  || "" ile çözüldü)
+        this.setSession(res.body._id, res.headers.get('x-access-token') || "", res.headers.get('x-refresh-token') || "");
+        console.log('Successfully signed up and now logged in!');
         console.log(res);
       })
     )
@@ -65,8 +80,13 @@ export class AuthService {
       headers: {
         // burada "Type ‘string | null’ is not assignable to type ‘string’" hatası geliyor. || "" ile çözüldü
         'x-refresh-token': this.getRefreshToken() || "",  
-        'user-id': this.getUserId() || ""
-      }
-    })
+        '_id': this.getUserId() || ""
+      },
+      observe: 'response'
+    }).pipe(
+      tap((res: HttpResponse<any>) => {
+        this.setAccessToken(res.headers.get('x-access-token') || "");
+      })
+    )
   }
 }
