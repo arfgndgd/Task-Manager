@@ -75,10 +75,13 @@
 }
 
 .task {
+    display: flex;
     background: white;
     padding: 15px 20px;
     border-radius: 5px;
     margin-top: 10px;
+
+    align-items: center;
 
     // .not(.complete) sayesinde üzerinde çizilmiş task aşağıdaki efektler uygulanmayacak
     &:not(.complete) {
@@ -87,6 +90,11 @@
 
         &:hover {
             box-shadow: 0 0 0 5px #eeeeee;
+
+            .task-buttons {
+                opacity: 1; //edit delete buttonlarının görünürlüğü üzerine gelince açar
+                transform: scale(1);
+            }
         }
 
         &:active {
@@ -94,9 +102,20 @@
         }
     }
 
-    &.completed { //üzeri çizilmiş task 
+    &.completed .task-text { //üzeri çizilmiş task 
         text-decoration: line-through;
         opacity: 0.8;
+    }
+
+    .task-text {
+        display: flex;
+        flex-grow: 1;
+    }
+
+    .task-buttons {
+        transition:  opacity 0.2s transform 0.2s;
+        opacity: 0; //edit delete buttonlarının görünürlüğü kaldırır
+        transform: scale(0.85);
     }
 }
 
