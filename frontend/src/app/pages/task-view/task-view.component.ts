@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Params } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { List } from 'src/app/models/list.model';
 import { Task } from 'src/app/models/task.model';
 import { TaskService } from 'src/app/task.service';
@@ -14,7 +14,9 @@ export class TaskViewComponent implements OnInit {
   lists: List[];
   tasks?: Task[]; //? nedeni aşağıda sıkıntı çıkarması
 
-  constructor(private taskService: TaskService, private route: ActivatedRoute) { }
+  selectedListId: string;
+
+  constructor(private taskService: TaskService, private route: ActivatedRoute, private router: Router) { }
 
   ngOnInit(): void {
 
@@ -22,6 +24,7 @@ export class TaskViewComponent implements OnInit {
     this.route.params.subscribe(
       (params: Params) => {
         if (params['listId']) {
+          this.selectedListId = (params['listId']);
           console.log(params)
           this.taskService.getTasks(params['listId']).subscribe((tasks: any) => {
             this.tasks = tasks;
@@ -50,4 +53,11 @@ export class TaskViewComponent implements OnInit {
   }
 
   //TODO: task routerlink hatalı
+
+  onDeleteListClick() {
+    this.taskService.deleteList(this.selectedListId).subscribe((res: any) => {
+      this.router.navigate(['/lists']);
+      console.log(res)
+    });
+  }
 }
